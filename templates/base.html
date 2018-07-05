@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/static/bootstrap/css/bootstrap.css" type="text/css" rel="stylesheet" />
+    <link href="/static/css/styles.css" type="text/css" rel="stylesheet" />
+    {% block css %}{% endblock %}
+    <title>Functional monitoring system</title>
+
+</head>
+
+<body>
+
+    {% include 'blocks/navigation.html' %}
+    <div class="container-fluid">
+        <div class="row">
+            {% include 'blocks/sidebar.html' %}
+            <main  class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+<script type="text/javascript" src="/static/bootstrap/js/bootstrap.js"></script>
+<script type="text/javascript" src="/static/js/navigation.js"></script>
+{% block js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+*.pyc
+*~
+*.mo
+venv/*
+/.idea
+.DS_Store
+/venv/
+/src/
