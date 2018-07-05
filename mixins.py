@@ -1,4 +1,3 @@
-from functools import wraps
 from flask import request, Response, render_template
 from flask.views import View
 
@@ -12,9 +11,9 @@ class AuthRequered:
         auth = request.authorization
         if not auth or not self.check_auth(auth.username, auth.password):
             return Response(
-            'Could not verify your access level for that URL.\n'
-            'You have to login with proper credentials', 401,
-            {'WWW-Authenticate': 'Basic realm="Login Required"'})
+                'Could not verify your access level for that URL.\n'
+                'You have to login with proper credentials', 401,
+                {'WWW-Authenticate': 'Basic realm="Login Required"'})
         return super().dispatch_request(*args, **kwargs)
 
 

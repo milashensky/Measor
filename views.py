@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, request, Response
+from flask import request, Response
 from flask.views import View
 from mixins import AuthRequered, TemplateView
 
@@ -26,6 +26,6 @@ class LogoutView(View):
 
     def dispatch_request(self, *args, **kwargs):
         return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+            'Could not verify your access level for that URL.\n'
+            'You have to login with proper credentials', 401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'})
