@@ -91,3 +91,13 @@ body {
 
 .border-top { border-top: 1px solid #e5e5e5; }
 .border-bottom { border-bottom: 1px solid #e5e5e5; }
+
+.has-error input,
+.has-error select,
+.has-error textarea {
+    border-color: #dc3545;
+}
+
+.has-error .invalid-feedback {
+    display: block;
+}

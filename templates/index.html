@@ -9,22 +9,32 @@
     <table class="table table-striped table-md">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Header</th>
-                <th>Header</th>
-                <th>Header</th>
-                <th>Header</th>
+                <th>Name</th>
+                <th>Created</th>
+                <th>Interval</th>
+                <th>Last run</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
-            {% if results %}
-            <tr>
-                <td>1,001</td>
-                <td>Lorem</td>
-                <td>ipsum</td>
-                <td>dolor</td>
-                <td>sit</td>
-            </tr>
+            {% if tasks %}
+                {% for task in tasks%}
+                <tr>
+                    <td>{{task.name}}</td>
+                    <td>{{task.created | timestamp2date()}}</td>
+                    <td>
+                        <span>
+                            {{ task.interval }}
+                            {% if task.interval_units == '0' %}Seconds{%endif%}
+                            {% if task.interval_units == '1' %}Minutes{%endif%}
+                            {% if task.interval_units == '2' %}Hours{%endif%}
+                            {% if task.interval_units == '3' %}Days{%endif%}
+                        </span>
+                    </td>
+                    <td>dolor</td>
+                    <td>sit</td>
+                </tr>
+                {% endfor %}
             {% else %}
             <tr class="text-center">
                 <td colspan="5">No tasks</td>

@@ -2,6 +2,46 @@
 {% block content %}
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-    <h1 class="h2">Create new task</h1>
+    <div class="row w-100">
+        <div class="col-12">
+            <h1 class="h2">Create new task</h1>
+        </div>
+        <div class="jumbotron col-sx-12 col-sm-8">
+            <form method="post">
+                <div class="form-group {% if errors and errors.name %}has-error{% endif %}">
+                    <label>Name</label>
+                    <input class="form-control" type="text" name="name" value="{{ data and data.name }}">
+                    {% if errors and errors.name %}
+                        <small class="invalid-feedback">{{ errors.name }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group {% if errors and errors.interval %}has-error{% endif %}">
+                    <label>Interval</label>
+                    <div class="input-group">
+                        <input class="form-control" type="number" name="interval" value="{{ data and data.interval }}">
+                        <div class="input-group-append">
+                            <select class="form-control" name="interval_units" value="{{ data and data.interval_units or 0 }}">
+                                <option {% if data and data.interval_units == '0' %}selected{%endif%} value="0">Seconds</option>
+                                <option {% if data and data.interval_units == '1' %}selected{%endif%} value="1">Minutes</option>
+                                <option {% if data and data.interval_units == '2' %}selected{%endif%} value="2">Hours</option>
+                                <option {% if data and data.interval_units == '3' %}selected{%endif%} value="3">Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    {% if errors and errors.interval %}
+                        <small class="invalid-feedback">{{ errors.interval }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group {% if errors and errors.code %}has-error{% endif %}">
+                    <label>Code for task</label>
+                    <textarea class="form-control" name="code" value="{{ data and data.code }}"></textarea>
+                    {% if errors and errors.code %}
+                        <small class="invalid-feedback">{{errors.code}}</small>
+                    {% endif %}
+                </div>
+                <button class="btn btn-info" type="submit">Create</button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

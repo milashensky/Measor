@@ -1,5 +1,0 @@
-::config::
-driver_name=chrome
-user_agent=Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en)
-
-::actions::
