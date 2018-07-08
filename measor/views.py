@@ -1,6 +1,7 @@
 import os
+import json
 
-from flask import request, Response, redirect, url_for, current_app as app
+from flask import request, Response, abort, redirect, url_for, current_app as app
 from flask.views import View
 from slugify import slugify
 
@@ -53,6 +54,41 @@ class CreateTaskView(AuthRequered, TemplateView):
         if len(errors.keys()) > 0:
             return super().get(**{'errors': errors, 'data': data})
         return redirect(url_for('index'))
+
+
+class TaskDetailView(AuthRequered, TemplateView):
+    template_name = 'task_detail.html'
+    task = None
+
+    def get_context_data(self, *args, **kwargs):
+        context = {'task': self.task}
+        dirpath = os.path.join(app.config['TASKS_DIR'], kwargs.get('slug', ''))
+        logs_path = os.path.join(dirpath, 'logs')
+        logs_names = list(os.walk(logs_path))[0][2]
+        logs_names.sort(reverse=True)
+        logs = []
+        if logs_names:
+            for name in logs_names:
+                date = int(name.split('log')[1].split('.')[0])
+                logs.append({"date": date, "name": name.split('.')[0]})
+            f = open(os.path.join(logs_path, logs_names[0]), 'r')
+            context['last_log'] = f.readlines()
+            context['last_name'] = logs_names[0].split('.')[0]
+            f.close()
+        context['logs'] = logs
+        return context
+
+    def dispatch_request(self, *args, **kwargs):
+        try:
+            f = open(os.path.join(app.config['TASKS_DIR'], kwargs.get('slug', ''), 'conf.json'), 'r')
+            self.task = json.loads(f.read())
+        except FileNotFoundError:
+            abort(404)
+        return super().dispatch_request(*args, **kwargs)
+
+
+class LogDetailView(AuthRequered, TemplateView):
+    template_name = 'task_detail.html'
 
 
 class LogoutView(View):

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{task.name}} task details</h1>
+</div>
+<div class="row w-100">
+    <div class="col-12">
+        <h3 class="h2">Log of {{last_name}}</h3>
+        <pre class="logs">{% if last_log %}<code>{% for line in last_log %}<span>{{ line }}</span>{% endfor %}</code>{% else %}<span class="m-0">No log data is found</span>{% endif %}</pre>
+    </div>
+    {% if logs %}
+    <div class="col-12">
+        <h2>History</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-md">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('log_detail', slug=task.slug, log_name=log.name)}}">{{log.name}}</a>
+                        </td>
+                        <td>{{ log.date | timestamp2date() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

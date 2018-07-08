@@ -2,8 +2,10 @@
 *~
 *.mo
 venv/*
+local_settings.py
 /.idea
 .DS_Store
 /venv/
 /src/
 /tasks/
+auth.txt

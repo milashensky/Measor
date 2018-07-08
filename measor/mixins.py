@@ -1,15 +1,13 @@
 from flask import request, Response, render_template
 from flask.views import View
+from measor.utils import check_auth
 
 
 class AuthRequered:
 
-    def check_auth(self, username, password):
-        return username == 'admin' and password == 'secret'
-
     def dispatch_request(self, *args, **kwargs):
         auth = request.authorization
-        if not auth or not self.check_auth(auth.username, auth.password):
+        if not auth or not check_auth(auth.username, auth.password):
             return Response(
                 'Could not verify your access level for that URL.\n'
                 'You have to login with proper credentials', 401,

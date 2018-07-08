@@ -6,7 +6,7 @@ import os
 
 from flask import Flask, send_from_directory
 
-from measor.views import IndexView, LogoutView, CreateTaskView
+from measor.views import IndexView, LogoutView, CreateTaskView, TaskDetailView, LogDetailView
 from measor.filters import format_datetime, timestamp2date
 
 
@@ -23,6 +23,8 @@ def create_app():
     app.add_url_rule('/', view_func=IndexView.as_view('index'))
     app.add_url_rule('/new_task', view_func=CreateTaskView.as_view('create_task'))
     app.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
+    app.add_url_rule('/task/<slug>', view_func=TaskDetailView.as_view('task_detail'))
+    app.add_url_rule('/task/<slug>/<log_name>', view_func=LogDetailView.as_view('log_detail'))
     app.jinja_env.filters['datetime'] = format_datetime
     app.jinja_env.filters['timestamp2date'] = timestamp2date
     return app

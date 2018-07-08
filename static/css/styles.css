@@ -101,3 +101,9 @@ body {
 .has-error .invalid-feedback {
     display: block;
 }
+
+pre.logs {
+    padding: 10px 30px;
+    background-color: #f3f9ff;
+    line-height: 30px;
+}

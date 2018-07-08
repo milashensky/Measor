@@ -11,6 +11,8 @@ def format_datetime(value, format='medium'):
 
 
 def timestamp2date(value, format=""):
+    if not value:
+        return None
     if not format:
         format = app.config.get('DATETIME_FORMAT') or '%Y-%m-%d %H:%M:%S'
     return datetime.fromtimestamp(int(value)).strftime(format)

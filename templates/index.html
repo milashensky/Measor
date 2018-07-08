@@ -9,18 +9,25 @@
     <table class="table table-striped table-md">
         <thead>
             <tr>
+                <th></th>
                 <th>Name</th>
                 <th>Created</th>
                 <th>Interval</th>
                 <th>Last run</th>
                 <th>Status</th>
+                <th>Last duriation</th>
             </tr>
         </thead>
         <tbody>
             {% if tasks %}
                 {% for task in tasks%}
                 <tr>
-                    <td>{{task.name}}</td>
+                    <td>
+
+                    </td>
+                    <td>
+                        <a href="{{ url_for('task_detail', slug=task.slug) }}">{{task.name}}</a>
+                    </td>
                     <td>{{task.created | timestamp2date()}}</td>
                     <td>
                         <span>
@@ -31,13 +38,21 @@
                             {% if task.interval_units == '3' %}Days{%endif%}
                         </span>
                     </td>
-                    <td>dolor</td>
-                    <td>sit</td>
+                    <td>{{task.last_run | timestamp2date()}}</td>
+                    <td>{% if task.last_status == True %}
+                        <span class="text-success">Success</span>
+                        {% elif task.last_status == False %}
+                        <span class="text-danger">Failed</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ task.last_duriation }} sec.</td>
                 </tr>
                 {% endfor %}
             {% else %}
             <tr class="text-center">
-                <td colspan="5">No tasks</td>
+                <td colspan="6">No tasks</td>
             </tr>
             {% endif %}
         </tbody>
