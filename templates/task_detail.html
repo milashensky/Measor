@@ -7,7 +7,7 @@
 <div class="row w-100">
     <div class="col-12">
         <h3 class="h2">Log of {{curr_name}}</h3>
-        <pre class="logs">{% if curr_log %}<code>{% for line in curr_log %}<span>{{ line }}</span>{% endfor %}</code>{% else %}<span class="m-0">No log data is found</span>{% endif %}</pre>
+        <pre class="logs">{% if curr_log %}<code>{% for line in curr_log %}<span>{{ line | decodeUnicode() }}</span>{% endfor %}</code>{% else %}<span class="m-0">No log data is found</span>{% endif %}</pre>
     </div>
     {% if logs %}
     <div class="col-12">

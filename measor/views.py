@@ -26,6 +26,7 @@ class CreateTaskView(AuthRequered, TemplateView):
 
     def get_context_data(*args, **kwargs):
         context = kwargs or {}
+        context['title'] = 'Create new task'
         return context
 
     def post(self, *args, **kwargs):
@@ -84,7 +85,7 @@ class TaskDetailView(AuthRequered, TemplateView):
                 curr_name = logs[0].get('name')
             elif not curr_name:
                 abort(404)
-            f = open(os.path.join(logs_path, curr_name + '.txt'), 'r')
+            f = open(os.path.join(logs_path, curr_name + '.txt'), 'r', encoding='utf-8')
             context['curr_log'] = f.readlines()
             context['curr_name'] = curr_name
             f.close()

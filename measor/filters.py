@@ -16,3 +16,7 @@ def timestamp2date(value, format=""):
     if not format:
         format = app.config.get('DATETIME_FORMAT') or '%Y-%m-%d %H:%M:%S'
     return datetime.fromtimestamp(int(value)).strftime(format)
+
+
+def decodeUnicode(value):
+    return value.encode().decode('unicode_escape')
