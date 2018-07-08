@@ -6,8 +6,8 @@
 </div>
 <div class="row w-100">
     <div class="col-12">
-        <h3 class="h2">Log of {{last_name}}</h3>
-        <pre class="logs">{% if last_log %}<code>{% for line in last_log %}<span>{{ line }}</span>{% endfor %}</code>{% else %}<span class="m-0">No log data is found</span>{% endif %}</pre>
+        <h3 class="h2">Log of {{curr_name}}</h3>
+        <pre class="logs">{% if curr_log %}<code>{% for line in curr_log %}<span>{{ line }}</span>{% endfor %}</code>{% else %}<span class="m-0">No log data is found</span>{% endif %}</pre>
     </div>
     {% if logs %}
     <div class="col-12">
@@ -24,7 +24,13 @@
                     {% for log in logs %}
                     <tr>
                         <td>
-                            <a href="{{ url_for('log_detail', slug=task.slug, log_name=log.name)}}">{{log.name}}</a>
+                            {% if not log.name == curr_name %}
+                            <a href="{{ url_for('log_detail', slug=task.slug, log_name=log.name)}}">
+                                {{log.name}}
+                            </a>
+                            {% else %}
+                                {{log.name}}
+                            {% endif %}
                         </td>
                         <td>{{ log.date | timestamp2date() }}</td>
                     </tr>

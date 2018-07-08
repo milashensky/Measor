@@ -64,16 +64,29 @@ class TaskDetailView(AuthRequered, TemplateView):
         context = {'task': self.task}
         dirpath = os.path.join(app.config['TASKS_DIR'], kwargs.get('slug', ''))
         logs_path = os.path.join(dirpath, 'logs')
-        logs_names = list(os.walk(logs_path))[0][2]
+        try:
+            logs_names = list(os.walk(logs_path))[0][2]
+        except IndexError:
+            logs_names = []
+        log_name = kwargs.get('log_name')
         logs_names.sort(reverse=True)
         logs = []
+        curr_name = ''
         if logs_names:
             for name in logs_names:
                 date = int(name.split('log')[1].split('.')[0])
-                logs.append({"date": date, "name": name.split('.')[0]})
-            f = open(os.path.join(logs_path, logs_names[0]), 'r')
-            context['last_log'] = f.readlines()
-            context['last_name'] = logs_names[0].split('.')[0]
+                if int(self.task.get('last_run', 0)) - date > 0:
+                    name = name.split('.')[0]
+                    logs.append({"date": date, "name": name})
+                    if name == log_name:
+                        curr_name = name
+            if not log_name:
+                curr_name = logs[0].get('name')
+            elif not curr_name:
+                abort(404)
+            f = open(os.path.join(logs_path, curr_name + '.txt'), 'r')
+            context['curr_log'] = f.readlines()
+            context['curr_name'] = curr_name
             f.close()
         context['logs'] = logs
         return context
@@ -85,10 +98,6 @@ class TaskDetailView(AuthRequered, TemplateView):
         except FileNotFoundError:
             abort(404)
         return super().dispatch_request(*args, **kwargs)
-
-
-class LogDetailView(AuthRequered, TemplateView):
-    template_name = 'task_detail.html'
 
 
 class LogoutView(View):

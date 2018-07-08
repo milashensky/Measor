@@ -9,3 +9,4 @@ local_settings.py
 /src/
 /tasks/
 auth.txt
+container
