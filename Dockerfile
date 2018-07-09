@@ -19,6 +19,7 @@ RUN apt-get update \
 
 FROM markadams/chromium-xvfb
 
+RUN apt-get install -y git
 RUN apt-get update && apt-get install -y \
     python python-pip curl unzip libgconf-2-4
 
@@ -31,12 +32,14 @@ RUN curl -SLO "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION
   && unzip "chromedriver_linux64.zip" -d /usr/local/bin \
   && rm "chromedriver_linux64.zip"
 
-COPY requirements.txt /usr/src/app/requirements.txt
+# RUN git clone https://github.com/milashensky/Measor.git /usr/src/app
+
+COPY . /usr/src/app
 WORKDIR /usr/src/app
 
+# RUN git checkout docker-image
 RUN pip install -r requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY . /usr/src/app
 
 CMD ["python3", "app.py"]

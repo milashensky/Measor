@@ -6,8 +6,10 @@ import time
 import threading
 import subprocess
 
-# path = '/home/milash/work/smappi/splinmon/tasks'
+# path = '/home/milash/work/smappi/Measor/tasks'
 path = "/home/tasks"
+CHECK_TIME = 20
+
 dirs = list(os.walk(path))[0][1]
 tasks = {}
 threads = {}
@@ -57,36 +59,47 @@ def exec_taskfile(dirpath):
 
 
 def run_task(dir, task):
-    dirpath = os.path.join(path, dir)
-    interval = int(task.get('interval')) * intervals[int(task.get('interval_units'))][1]
-    f = open(os.path.join(dirpath, 'running'), 'w')
-    t_start = datetime.datetime.now().timestamp()
-    f.write('%s' % t_start)
-    f.close()
-    status = exec_taskfile(dirpath)
-    print('start run %s' % task['name'])
-    time.sleep(5)
-    print('sleep %s' % task['name'])
-    os.remove(os.path.join(dirpath, 'running'))
-    f = open(os.path.join(dirpath, 'conf.json'), 'w')
-    t_end = datetime.datetime.now().timestamp()
-    task['last_run'] = t_end
-    task['last_duriation'] = round(t_end - t_start)
-    task['last_status'] = status
-    f.write(json.dumps(task))
-    f.close()
-    time.sleep(interval)
+    if not task.get('pause', False) or task.get('build_now', False):
+        dirpath = os.path.join(path, dir)
+        f = open(os.path.join(dirpath, 'running'), 'w')
+        t_start = datetime.datetime.now().timestamp()
+        f.write('%s' % t_start)
+        f.close()
+        status = exec_taskfile(dirpath)
+        # print('start run %s' % task['name'])
+        time.sleep(5)
+        # print('sleep %s' % task['name'])
+        os.remove(os.path.join(dirpath, 'running'))
+
+        f = open(os.path.join(dirpath, 'conf.json'), 'r')
+        t_end = datetime.datetime.now().timestamp()
+        try:
+            task = json.loads(f.read())
+        except ValueError:
+            pass
+        f.close()
+        task['last_run'] = t_end
+        task['last_duriation'] = round(t_end - t_start)
+        task['last_status'] = status
+        f = open(os.path.join(dirpath, 'conf.json'), 'w')
+        f.write(json.dumps(task))
+        f.close()
 
 
 def runner(dir, task, *args, **kwargs):
     t = threading.currentThread()
-    print('new thread %s' % task['name'])
+    # print('new thread %s' % task['name'])
     while getattr(t, "do_run", True):
         try:
+            interval = int(task.get('interval')) * intervals[int(task.get('interval_units'))][1]
             run_task(dir, task)
+            sleep = 0
+            while getattr(t, "do_run", True) and sleep < interval:
+                time.sleep(2)
+                sleep += 2
         except FileNotFoundError:
             pass
-    print('stop run %s' % task['name'])
+    # print('stop run %s' % task['name'])
 
 
 try:
@@ -101,42 +114,65 @@ try:
             thread.start()
             threads[dir] = thread
         while True:
-            time.sleep(30)
+            time.sleep(CHECK_TIME)
             dirs = list(os.walk(path))[0][1]
             new_tasks = prepare_tasks(dirs)
             old_tasks = tasks.copy()
+            tasks = new_tasks.copy()
             for name, task in new_tasks.items():
+                changed = delete = False
                 old_task = old_tasks.pop(name, None)
                 if old_task:
-                    changed = False
-                    for key, val in old_task.items():
-                        if not task[key] == val:
-                            changed = True
-                            break
+                    if task.get('build_now', False):
+                        print('build_now')
+                        changed = True
+                    else:
+                        for key, val in old_task.items():
+                            if key not in ['last_run', 'last_status']:
+                                if not task[key] == val:
+                                    changed = True
+                                    break
                     if changed:
+                        print('run changed %s', task.get('name'))
+                        t = threads.get(name, None)
+                        delete = task.get('wait_for_delete', False)
+                        if t:
+                            t.do_run = False
+                            t.join()
+                            threads[name] = None
+                        if not task.get('pause', False) and not delete:
+                            print('gonna runs', task.get('slug'))
+                            t2 = threading.Thread(
+                                target=runner,
+                                args=[task.get('slug'), task],
+                                daemon=True
+                            )
+                            t2.start()
+                            threads[name] = t2
+                        else:
+                            print('task is paused %s', task.get('name'))
+                else:
+                    if not task.get('pause', False) and not delete:
                         t = threads.get(name, None)
                         if t:
                             t.do_run = False
                             t.join()
                         t2 = threading.Thread(
                             target=runner,
-                            args=[dir, task],
+                            args=[task.get('slug'), task],
                             daemon=True
                         )
                         t2.start()
                         threads[name] = t2
-                else:
-                    t = threads.get(name, None)
-                    if t:
-                        t.do_run = False
-                        t.join()
-                    t2 = threading.Thread(
-                        target=runner,
-                        args=[dir, task],
-                        daemon=True
-                    )
-                    t2.start()
-                    threads[name] = t2
+                    else:
+                        print('task is paused %s', task.get('name'))
+                if changed and not delete:
+                    task['build_now'] = False
+                    f = open(os.path.join(path, task.get('slug'), 'conf.json'), 'w')
+                    f.write(json.dumps(task))
+                    f.close()
+                if delete:
+                    shutil.rmtree(os.path.join(path, task.get('slug')))
             for name, task in old_tasks.items():
                 t = threads.get(name, None)
                 if t:
