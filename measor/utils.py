@@ -15,8 +15,11 @@ def build_conf(data):
         "interval_units": data.get("interval_units"),
         "created": datetime.now().timestamp(),
         "slug": slugify(data.get('name')),
+        "build_now": False,
+        "pause": False,
+        'wait_for_delete': False,
     }
-    return json.dumps(out)
+    return out
 
 
 def get_tasks():
@@ -25,7 +28,9 @@ def get_tasks():
     for name in names:
         try:
             f = open(os.path.join(app.config['TASKS_DIR'], name, 'conf.json'), 'r')
-            tasks.append(json.loads(f.read()))
+            task = json.loads(f.read())
+            if not task.get('wait_for_delete'):
+                tasks.append(task)
         except FileNotFoundError:
             pass
     return tasks

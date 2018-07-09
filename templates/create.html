@@ -34,7 +34,7 @@
                 </div>
                 <div class="form-group {% if errors and errors.code %}has-error{% endif %}">
                     <label>Code for task</label>
-                    <textarea class="form-control" name="code" value="{{ data and data.code }}"></textarea>
+                    <textarea class="form-control" style="min-height: 250px" name="code">{{ data and data.code }}</textarea>
                     {% if errors and errors.code %}
                         <small class="invalid-feedback">{{errors.code}}</small>
                     {% endif %}

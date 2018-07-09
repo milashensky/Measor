@@ -3,6 +3,10 @@
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
     <h1 class="h2">{{task.name}} task details</h1>
+    <div class="d-flex text-white">
+        <a class="btn btn-sm btn-info" href="{{ url_for('edit_task', slug=task.slug) }}">Edit task</a>
+        <a class="btn btn-sm btn-danger ml-2" href="{{ url_for('delete_task', slug=task.slug) }}">Delete task</a>
+    </div>
 </div>
 <div class="row w-100">
     <div class="col-12">

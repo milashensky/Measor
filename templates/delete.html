@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">Delete {{task.name}} task</h1>
+</div>
+<h3> Are you shure?</h3>
+<form method="post">
+    <input hidden name="action" value="delete"></input>
+    <a class="btn btn-link" href="/">No</a>
+    <button type="submit" class="btn btn-danger">Yes</button>
+</form>
+{% endblock %}

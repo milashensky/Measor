@@ -1,4 +1,7 @@
-from flask import request, Response, render_template
+import os
+import json
+
+from flask import request, Response, render_template, abort, current_app as app
 from flask.views import View
 from measor.utils import check_auth
 
@@ -16,6 +19,7 @@ class AuthRequered:
 
 
 class TemplateView(View):
+    methods = ['GET', 'POST']
 
     def render_template(self, context):
         return render_template(self.get_template_name(), **context)
@@ -38,3 +42,20 @@ class TemplateView(View):
 
     def post(self, *args, **kwargs):
         return Response('Method is not allowed', 405, {})
+
+
+class TaskRequeredMixin:
+    task = {}
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['task'] = self.task
+        return context
+
+    def dispatch_request(self, *args, **kwargs):
+        try:
+            f = open(os.path.join(app.config['TASKS_DIR'], kwargs.get('slug', ''), 'conf.json'), 'r')
+            self.task = json.loads(f.read())
+        except FileNotFoundError:
+            abort(404)
+        return super().dispatch_request(*args, **kwargs)
