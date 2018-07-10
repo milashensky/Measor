@@ -107,3 +107,10 @@ pre.logs {
     background-color: #f3f9ff;
     line-height: 30px;
 }
+
+td.td-icon {
+    padding: 0.5rem !important;
+}
+td.td-icon i.fa {
+    font-size: 30px
+}

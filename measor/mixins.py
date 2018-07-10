@@ -59,3 +59,14 @@ class TaskRequeredMixin:
         except FileNotFoundError:
             abort(404)
         return super().dispatch_request(*args, **kwargs)
+
+
+class ApiMixin(View):
+    methods = ['GET', 'POST']
+
+    def dispatch_request(self, *args, **kwargs):
+        if request.method == 'POST':
+            return self.post(*args, **kwargs)
+        elif request.method == 'GET':
+            return self.get(*args, **kwargs)
+        return Response('Method is not allowed', 405, {})

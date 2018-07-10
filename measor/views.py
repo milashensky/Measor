@@ -5,7 +5,7 @@ from flask import request, Response, abort, redirect, url_for, current_app as ap
 from flask.views import View
 from slugify import slugify
 
-from measor.mixins import AuthRequered, TemplateView, TaskRequeredMixin
+from measor.mixins import AuthRequered, TemplateView, TaskRequeredMixin, ApiMixin
 from measor.utils import build_conf, get_tasks
 
 
@@ -136,3 +136,27 @@ class TaskDeleteView(AuthRequered, TaskRequeredMixin, TemplateView):
         f.write(json.dumps(self.task))
         f.close()
         return redirect(url_for('index'))
+
+
+class ApiTask(AuthRequered, TaskRequeredMixin, ApiMixin):
+    methods = ['GET', 'POST']
+
+    def get(self, *args, **kwargs):
+        return json.dumps(self.task), 200, {'ContentType': 'application/json'}
+
+    def post(self, *args, **kwargs):
+        data = json.loads(request.data.decode())
+        if data.get('action') == 'build_now':
+            self.task['build_now'] = True
+            f = open(os.path.join(app.config['TASKS_DIR'], self.task.get('slug', ''), 'conf.json'), 'w')
+            f.write(json.dumps(self.task))
+            f.close()
+            return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+        return json.dumps({'success': False}), 200, {'ContentType': 'application/json'}
+
+
+class ApiTasks(AuthRequered, ApiMixin):
+    methods = ['GET']
+
+    def get(self, *args, **kwargs):
+        return json.dumps(get_tasks(with_run_status=True)), 200, {'ContentType': 'application/json'}

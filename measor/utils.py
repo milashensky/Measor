@@ -24,7 +24,7 @@ def build_conf(data):
     return out
 
 
-def get_tasks():
+def get_tasks(with_run_status=False):
     tasks = []
     names = list(os.walk(app.config['TASKS_DIR']))[0][1]
     for name in names:
@@ -32,6 +32,11 @@ def get_tasks():
             f = open(os.path.join(app.config['TASKS_DIR'], name, 'conf.json'), 'r')
             task = json.loads(f.read())
             if not task.get('wait_for_delete'):
+                if with_run_status:
+                    try:
+                        task['running'] = 'running' in list(os.walk(os.path.join(app.config['TASKS_DIR'], name)))[0][2]
+                    except IndexError:
+                        task['running'] = False
                 tasks.append(task)
         except FileNotFoundError:
             pass
