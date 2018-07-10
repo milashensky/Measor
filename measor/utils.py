@@ -18,6 +18,8 @@ def build_conf(data):
         "build_now": False,
         "pause": False,
         'wait_for_delete': False,
+        'max_logs_count': data.get("max_logs_count", app.config['MAX_LOGS_COUNT']),
+        'max_log_life': data.get("max_log_life", app.config['MAX_LOG_LIFE_DAYS'])
     }
     return out
 

@@ -7,6 +7,9 @@ AUTH_SALT = b'0394a2ede332c9a13eb82e9b24631604c31df978b4e2f0fbd2c549944f9d79a5'
 
 DEBUG = False
 
+MAX_LOGS_COUNT = 100
+MAX_LOG_LIFE_DAYS = 7
+
 if not os.path.exists(TASKS_DIR):
     os.makedirs(TASKS_DIR)
 

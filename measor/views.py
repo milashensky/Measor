@@ -25,7 +25,11 @@ class CreateTaskView(AuthRequered, TemplateView):
     task = {}
 
     def get_context_data(self, *args, **kwargs):
-        context = kwargs or {}
+        context = kwargs or {"data": {
+            'max_logs_count': app.config['MAX_LOGS_COUNT'],
+            'max_log_life': app.config['MAX_LOG_LIFE_DAYS']}
+        }
+
         context['title'] = 'Create new task'
         return context
 
@@ -43,12 +47,14 @@ class CreateTaskView(AuthRequered, TemplateView):
         if self.task.get('slug'):
             task.pop('pause', None)
             task.pop('slug', None)
-            self.task['edited'] = task.pop('created', None)
-            self.task.update(task)
-            task = self.task
+            tmp_task = self.task.copy()
+            tmp_task['edited'] = task.pop('created', None)
+            tmp_task.update(task)
+            task = tmp_task
         if task.get('slug') and not have_errors:
             path = os.path.join(app.config['TASKS_DIR'], task.get('slug'))
-            if (self.task.get('slug') or not os.path.exists(path)) and not os.path.exists(os.path.join(app.config['TASKS_DIR'], slugify(task.get('name')))):
+            tmp = os.path.join(app.config['TASKS_DIR'], slugify(task.get('name')))
+            if (self.task.get('slug') or not os.path.exists(path)) and (self.task.get('slug') == slugify(task.get('name')) or not os.path.exists(tmp)):
                 if not self.task.get('slug'):
                     os.makedirs(path)
                 f = open(os.path.join(path, 'conf.json'), 'w')
@@ -94,6 +100,7 @@ class TaskDetailView(AuthRequered, TaskRequeredMixin, TemplateView):
             f = open(os.path.join(logs_path, curr_name + '.txt'), 'r', encoding='utf-8')
             context['curr_log'] = f.readlines()
             context['curr_name'] = curr_name
+            context['logs_count'] = len(logs_names)
             f.close()
         context['logs'] = logs
         return context

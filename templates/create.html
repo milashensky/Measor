@@ -39,6 +39,22 @@
                         <small class="invalid-feedback">{{errors.code}}</small>
                     {% endif %}
                 </div>
+                <div class="form-group {% if errors and errors.max_logs_count %}has-error{% endif %}">
+                    <label>Max # of logs to keep</label>
+                    <input class="form-control" type="number" name="max_logs_count" value="{{ data and data.max_logs_count }}">
+                    <small class="d-block block-info">If not empty, only up to this number of logs are kept</small>
+                    {% if errors and errors.interval %}
+                        <small class="invalid-feedback">{{ errors.max_logs_count }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group {% if errors and errors.max_log_life %}has-error{% endif %}">
+                    <label>Days to keep logs</label>
+                    <input class="form-control" type="number" name="max_log_life" value="{{ data and data.max_log_life }}">
+                    <small class="d-block block-info">If not empty, logs are only kept up to this number of days</small>
+                    {% if errors and errors.interval %}
+                        <small class="invalid-feedback">{{ errors.max_log_life }}</small>
+                    {% endif %}
+                </div>
                 <button class="btn btn-info" type="submit">Create</button>
             </form>
         </div>
