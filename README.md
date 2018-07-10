@@ -22,8 +22,10 @@ with Browser('chrome') as browser:
         print("No, it wasn't found... We need to improve our SEO techniques")
 ```
 And it will run correctly.
-If you like to change docker image for your needs, maybe you should checkout branch `docker-image`
-After creating your own image you should set its name in settings.py (or local_settings.py)
+
+If you like to change docker image for your needs, maybe you should checkout branch `docker-image`.
+
+After creating your own image you should set its name in settings.py (or local_settings.py).
 ```python
 DOCKER_IMAGE_NAME = 'milashensky/measor_tasks_runner'
 ```
