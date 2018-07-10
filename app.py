@@ -102,6 +102,40 @@ def runner(dir, task, *args, **kwargs):
     # print('stop run %s' % task['name'])
 
 
+def clean_logs(task):
+    max_log_life = task.get('max_log_life', 0)
+    max_logs_count =  task.get('max_logs_count', 0)
+    logs_path = os.path.join(path, task['slug'], 'logs')
+    if os.path.exists(logs_path) and (max_log_life or max_logs_count):
+        try:
+            logs_names = list(os.walk(logs_path))[0][2]
+            logs_names.sort()
+            if max_log_life:
+                max_date = datetime.datetime.now() - datetime.timedelta(int(max_log_life))
+                max_date = max_date.timestamp()
+                for name in logs_names:
+                    date = int(name.split('log')[1].split('.')[0])
+                    if date - max_date < 0:
+                        try:
+                            os.remove(os.path.join(logs_path, name))
+                        except OSError:
+                            pass
+                logs_names = list(os.walk(logs_path))[0][2]
+                logs_names.sort()
+            del_l = len(logs_names) - int(max_logs_count)
+            if max_logs_count and del_l > 0:
+                to_delete = logs_names[:del_l]
+                for name in to_delete:
+                    try:
+                        os.remove(os.path.join(logs_path, name))
+                    except OSError:
+                        pass
+        except IndexError:
+            return True
+    return True
+
+
+# main task
 try:
     try:
         tasks = prepare_tasks(dirs)
@@ -121,8 +155,11 @@ try:
             tasks = new_tasks.copy()
             for name, task in new_tasks.items():
                 changed = delete = False
+                delete = task.get('wait_for_delete', False)
+                if not delete:
+                    clean_logs(task)
                 old_task = old_tasks.pop(name, None)
-                if old_task:
+                if old_task and not delete:
                     if task.get('build_now', False):
                         print('build_now')
                         changed = True
@@ -135,7 +172,6 @@ try:
                     if changed:
                         print('run changed %s', task.get('name'))
                         t = threads.get(name, None)
-                        delete = task.get('wait_for_delete', False)
                         if t:
                             t.do_run = False
                             t.join()
@@ -152,11 +188,12 @@ try:
                         else:
                             print('task is paused %s', task.get('name'))
                 else:
+                    t = threads.get(name, None)
+                    if t:
+                        t.do_run = False
+                        t.join()
+                        threads[name] = None
                     if not task.get('pause', False) and not delete:
-                        t = threads.get(name, None)
-                        if t:
-                            t.do_run = False
-                            t.join()
                         t2 = threading.Thread(
                             target=runner,
                             args=[task.get('slug'), task],
