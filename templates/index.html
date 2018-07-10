@@ -5,7 +5,7 @@
 </div>
 
 <h2>List of tasks</h2>
-<div class="table-responsive" id="dashboard">
+<div class="table-responsive" id="dashboard" v-cloak>
     <table class="table table-striped table-md">
         <thead>
             <tr>
@@ -20,36 +20,42 @@
             </tr>
         </thead>
         <tbody>
-            {% if tasks %}
-                {% for task in tasks%}
-                <tr>
-                    <td class="td-icon">
-                        <runner-status slug="{{ task.slug }}"></runner-status>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('task_detail', slug=task.slug) }}">{{task.name}}</a>
-                    </td>
-                    <td>{{task.created | timestamp2date()}}</td>
-                    <td>
-                        <span>
-                            {{ task.interval }}
-                            {% if task.interval_units == '0' %}Seconds{%endif%}
-                            {% if task.interval_units == '1' %}Minutes{%endif%}
-                            {% if task.interval_units == '2' %}Hours{%endif%}
-                            {% if task.interval_units == '3' %}Days{%endif%}
-                        </span>
-                    </td>
-                    <td>{{task.last_run | timestamp2date()}}</td>
-                    <td><task-status slug="{{ task.slug }}"></task-status></td>
-                    <td>{{ task.last_duriation }} sec.</td>
-                    <td class="td-icon"><run-now slug="{{ task.slug }}"></run-now></td>
-                </tr>
-                {% endfor %}
-            {% else %}
-            <tr class="text-center">
+            {% raw %}
+            <tr v-if="tasks.length" v-for="task in tasks">
+                <td class="td-icon">
+                    <i v-show="!task.running && !task.pause" class="fa fa-sun-o text-info" tooltip="Wait"></i>
+                    <i v-show="task.running" class="fa fa-certificate fa-spin text-success" tooltip="Running now"></i>
+                    <i v-show="!task.running && task.pause" class="fa fa-certificate text-muted" tooltip="Paused"></i>
+                </td>
+                <td>
+                    <a>{{task.name}}</a>
+                </td>
+                <td>{{ ts2date(task.created) }}</td>
+                <td>
+                    <span>
+                        {{ task.interval }}
+                        <span v-if="task.interval_units == '0'">Seconds</span>
+                        <span v-if="task.interval_units == '1'">Minutes</span>
+                        <span v-if="task.interval_units == '2'">Hours</span>
+                        <span v-if="task.interval_units == '3'">Days</span>
+                    </span>
+                </td>
+                <td>{{ ts2date(task.last_run) }}</td>
+                <td>
+                    <span v-show="task.last_status != undefined" :class="(task.last_status? 'text-success': 'text-danger')">{{(task.last_status? 'Success': 'Error')}}</span>
+                    <span v-show="task.last_status == undefined">-</span>
+                </td>
+                <td>{{task.last_duriation}} sec.</td>
+                <td class="td-icon">
+                    <i v-show="!task.build_now && !task.pause" class="fa fa-clock-o text-info" tooltip="Run now" v-on:click="run(task.slug)"></i>
+                    <i v-show="task.build_now && !task.pause" class="fa fa-clock-o text-warning" tooltip="Added to queue"></i>
+                    <i v-show="task.pause" class="fa fa-clock-o text-muted" tooltip="Task paused"></i>
+                </td>
+            </tr>
+            <tr v-if="tasks.length == 0" class="text-center">
                 <td colspan="9">No tasks</td>
             </tr>
-            {% endif %}
+            {% endraw %}
         </tbody>
     </table>
 </div>

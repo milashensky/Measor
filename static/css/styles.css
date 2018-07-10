@@ -114,3 +114,6 @@ td.td-icon {
 td.td-icon i.fa {
     font-size: 30px
 }
+
+[v-cloak] > * { display:none }
+[v-cloak]::before { content: "loading…" }
