@@ -35,6 +35,9 @@ $().ready(function() {
             return true
         },
         methods: {
+            buildUrl: function(task) {
+                return '/task/' + task.slug
+            },
             ts2date: function(ts){
                 let date = new Date(ts * 1000)
                 return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()

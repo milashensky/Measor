@@ -28,7 +28,7 @@
                     <i v-show="!task.running && task.pause" class="fa fa-certificate text-muted" tooltip="Paused"></i>
                 </td>
                 <td>
-                    <a>{{task.name}}</a>
+                    <a :href="buildUrl(task)">{{task.name}}</a>
                 </td>
                 <td>{{ ts2date(task.created) }}</td>
                 <td>
@@ -61,7 +61,7 @@
 </div>
 {% endblock %}
 {% block js%}
-<script type="text/javascript" src="/static/plugins/vue/vue.js"></script>
+<script type="text/javascript" src="/static/plugins/vue/vue.min.js"></script>
 <script type="text/javascript" src="/static/plugins/vue/vue-resource.js"></script>
 <script type="text/javascript" src="/static/js/runner-vue.js"></script>
 {% endblock %}
