@@ -12,7 +12,7 @@ def init_docker(settings):
     except docker.errors.APIError:
         pass
 
-    image = client.images.list()[0]
+    image = client.images.get(settings['DOCKER_IMAGE_NAME'])
     volume = {settings['TASKS_DIR']: {'bind': '/home/tasks', 'mode': 'rw'}}
     container = client.containers.run(image, volumes=volume, name="measor_tasks_runner", detach=True)
     f = open(path, 'w')

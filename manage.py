@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import sys
 import os
+import getpass
+import hashlib
+import binascii
 
 from flask import Flask, send_from_directory
 
@@ -21,8 +23,8 @@ def create_app():
     def send_static(path):
         return send_from_directory('static', path)
 
-    # container = init_docker(app.config)
-    # app.config['CONTAINER_ID'] = container.id
+    container = init_docker(app.config)
+    app.config['CONTAINER_ID'] = container.id
 
     app.add_url_rule('/', view_func=IndexView.as_view('index'))
     app.add_url_rule('/new_task', view_func=CreateTaskView.as_view('create_task'))
@@ -38,6 +40,31 @@ def create_app():
     return app
 
 
-port = int(os.environ.get('PORT', 8000))
-app = create_app()
-app.run(port=port)
+def create_user(settings):
+    print('Username: ')
+    name = input()
+    if not name:
+        print("Username can not be empty")
+        return False
+    password = getpass.getpass('Password: ')
+    passw2 = getpass.getpass('Password again: ')
+    if password == passw2:
+        path = settings.get('AUTH_FILE_PATH')
+        pass_str = 'username=%s; password=%s' % (name, password)
+        dk = hashlib.pbkdf2_hmac('sha256', pass_str.encode(), settings.get('AUTH_SALT'), 100000)
+        token = binascii.hexlify(dk).decode()
+        f = open(path, 'a')
+        f.write(token + '\n')
+        return True
+    else:
+        print('Passwords does not match')
+    return False
+
+
+if 'runserver' in sys.argv:
+    port = int(os.environ.get('PORT', 8000))
+    app = create_app()
+    app.run(port=port)
+elif 'create_user' in sys.argv:
+    app = create_app()
+    create_user(app.config)

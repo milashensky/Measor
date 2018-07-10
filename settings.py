@@ -9,6 +9,7 @@ DEBUG = False
 
 MAX_LOGS_COUNT = 100
 MAX_LOG_LIFE_DAYS = 7
+DOCKER_IMAGE_NAME = 'milashensky/measor_tasks_runner'
 
 if not os.path.exists(TASKS_DIR):
     os.makedirs(TASKS_DIR)
