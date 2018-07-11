@@ -42,7 +42,7 @@
                 </td>
                 <td>{{ ts2date(task.last_run) }}</td>
                 <td>
-                    <span v-show="task.last_status != undefined" :class="(task.last_status? 'text-success': 'text-danger')">{{(task.last_status? 'Success': 'Error')}}</span>
+                    <span v-show="task.last_status != undefined" :class="(task.last_status? 'text-success': 'text-danger')">{{(task.last_status? 'Success': 'Failed')}}</span>
                     <span v-show="task.last_status == undefined">-</span>
                 </td>
                 <td>{{task.last_duriation}} sec.</td>

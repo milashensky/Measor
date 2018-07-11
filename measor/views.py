@@ -80,6 +80,8 @@ class TaskDetailView(AuthRequered, TaskRequeredMixin, TemplateView):
             logs_names = list(os.walk(logs_path))[0][2]
         except IndexError:
             logs_names = []
+        if self.task.get('max_logs_count'):
+            logs_names = logs_names[:int(self.task.get('max_logs_count'))]
         log_name = kwargs.get('log_name')
         logs_names.sort(reverse=True)
         logs = []
@@ -97,7 +99,10 @@ class TaskDetailView(AuthRequered, TaskRequeredMixin, TemplateView):
             elif not curr_name:
                 abort(404)
             f = open(os.path.join(logs_path, curr_name + '.txt'), 'r', encoding='utf-8')
-            context['curr_log'] = f.readlines()
+            data = f.readlines()
+            context['curr_log'] = data
+            if len(data) and data[-1].lower() == 'success':
+                context['curr_status'] = True
             context['curr_name'] = curr_name
             context['logs_count'] = len(logs_names)
             f.close()
@@ -137,6 +142,20 @@ class TaskDeleteView(AuthRequered, TaskRequeredMixin, TemplateView):
         return redirect(url_for('index'))
 
 
+class PauseTaskView(AuthRequered, TaskRequeredMixin, ApiMixin):
+    methods = ['GET']
+
+    def get(self, *args, **kwargs):
+        if self.task.get('pause', False):
+            self.task['pause'] = False
+        else:
+            self.task['pause'] = True
+        f = open(os.path.join(app.config['TASKS_DIR'], self.task.get('slug', ''), 'conf.json'), 'w')
+        f.write(json.dumps(self.task))
+        f.close()
+        return redirect(url_for('task_detail', slug=self.task.get('slug')))
+
+
 class ApiTask(AuthRequered, TaskRequeredMixin, ApiMixin):
     methods = ['GET', 'POST']
 
@@ -159,3 +178,19 @@ class ApiTasks(AuthRequered, ApiMixin):
 
     def get(self, *args, **kwargs):
         return json.dumps(get_tasks(with_run_status=True)), 200, {'ContentType': 'application/json'}
+
+
+class ApiTaskLogStatus(AuthRequered, TaskRequeredMixin, ApiMixin):
+    methods = ['GET']
+
+    def get(self, *args, **kwargs):
+        status = False
+        try:
+            f = open(os.path.join(app.config['TASKS_DIR'], self.task.get('slug', ''), 'logs', kwargs.get('log_name', '') + '.txt'), 'r')
+            data = f.readlines()
+            if len(data) and data[-1].lower() == 'success':
+                status = True
+            f.close()
+        except OSError:
+            pass
+        return json.dumps({'status': status}), 200, {'ContentType': 'application/json'}

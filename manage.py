@@ -8,7 +8,10 @@ import binascii
 
 from flask import Flask, send_from_directory
 
-from measor.views import IndexView, LogoutView, CreateTaskView, TaskDetailView, TaskEditView, TaskDeleteView, ApiTask, ApiTasks
+from measor.views import (
+    IndexView, LogoutView, CreateTaskView, TaskDetailView, TaskEditView,
+    TaskDeleteView, ApiTask, ApiTasks, PauseTaskView, ApiTaskLogStatus
+)
 from measor.filters import format_datetime, timestamp2date, decodeUnicode
 from measor.docker import init_docker
 
@@ -23,18 +26,22 @@ def create_app():
     def send_static(path):
         return send_from_directory('static', path)
 
-    container = init_docker(app.config)
-    app.config['CONTAINER_ID'] = container.id
+    if app.config['RUN_DOCKER_ON_START']:
+        container = init_docker(app.config)
+        app.config['CONTAINER_ID'] = container.id
 
     app.add_url_rule('/', view_func=IndexView.as_view('index'))
     app.add_url_rule('/new_task', view_func=CreateTaskView.as_view('create_task'))
     app.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
     app.add_url_rule('/task/<slug>', view_func=TaskDetailView.as_view('task_detail'))
     app.add_url_rule('/task/<slug>/edit', view_func=TaskEditView.as_view('edit_task'))
+    app.add_url_rule('/task/<slug>/pause', view_func=PauseTaskView.as_view('pause_task'))
     app.add_url_rule('/task/<slug>/delete', view_func=TaskDeleteView.as_view('delete_task'))
     app.add_url_rule('/task/<slug>/<log_name>', view_func=TaskDetailView.as_view('log_detail'))
+
     app.add_url_rule('/api/task/<slug>', view_func=ApiTask.as_view('task_api'))
     app.add_url_rule('/api/task/', view_func=ApiTasks.as_view('tasks_api'))
+    app.add_url_rule('/api/<slug>/log/<log_name>/status', view_func=ApiTaskLogStatus.as_view('log_status_api'))
     app.jinja_env.filters['decodeUnicode'] = decodeUnicode
     app.jinja_env.filters['datetime'] = format_datetime
     app.jinja_env.filters['timestamp2date'] = timestamp2date

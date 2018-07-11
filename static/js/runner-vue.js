@@ -40,7 +40,7 @@ $().ready(function() {
             },
             ts2date: function(ts){
                 let date = new Date(ts * 1000)
-                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+                return date.toLocaleString('en-US', { hour12: false })
             },
             run: function(slug){
                 let vm = this;

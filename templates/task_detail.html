@@ -4,25 +4,36 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
     <h1 class="h2">{{task.name}} task details</h1>
     <div class="d-flex text-white">
+        {% if task.pause %}
+        <a class="btn btn-sm btn-secondary mr-2" href="{{ url_for('pause_task', slug=task.slug) }}">Unpause task</a>
+        {% else %}
+        <a class="btn btn-sm btn-secondary mr-2" href="{{ url_for('pause_task', slug=task.slug) }}">Pause task</a>
+        {% endif %}
         <a class="btn btn-sm btn-info" href="{{ url_for('edit_task', slug=task.slug) }}">Edit task</a>
         <a class="btn btn-sm btn-danger ml-2" href="{{ url_for('delete_task', slug=task.slug) }}">Delete task</a>
     </div>
 </div>
 <div class="row w-100">
-    <div class="col-12">
+    <div class="col-6">
         <h3 class="h2">Log of {{curr_name}}</h3>
+    </div>
+    <div class="col-6 text-right">
+        <h4>Status: {% if curr_status %}<span class="text-success">Success</span>{% else %}<span class="text-danger">Failed</span>{% endif %}</h4>
+    </div>
+    <div class="col-12">
         <pre class="logs">{% if curr_log %}<code>{% for line in curr_log %}<span>{{ line | decodeUnicode() }}</span>{% endfor %}</code>{% else %}<span class="m-0">No log data is found</span>{% endif %}</pre>
     </div>
     {% if logs %}
     <div class="col-12">
         <h2>History</h2>
         <small>Tolal found {{logs_count}} logs</small>
-        <div class="table-responsive">
+        <div class="table-responsive" id="logs">
             <table class="table table-striped table-md">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Date</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,6 +49,7 @@
                             {% endif %}
                         </td>
                         <td>{{ log.date | timestamp2date() }}</td>
+                        <td><log-status slug="{{task.slug}}" name="{{log.name}}"></log-status></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -46,4 +58,9 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+{% block js%}
+<script type="text/javascript" src="/static/plugins/vue/vue.min.js"></script>
+<script type="text/javascript" src="/static/plugins/vue/vue-resource.js"></script>
+<script type="text/javascript" src="/static/js/log-status-vue.js"></script>
 {% endblock %}
