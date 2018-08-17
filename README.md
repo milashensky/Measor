@@ -26,9 +26,30 @@ And it will run correctly.
 If you like to change docker image for your needs, maybe you should checkout branch `docker-image`.
 
 After creating your own image you should set its name in settings.py (or local_settings.py).
+
 ```python
 DOCKER_IMAGE_NAME = 'milashensky/measor_tasks_runner'
 ```
+
+Main interface
+![Dashboard interface](https://image.ibb.co/cATx5z/Main.png)
+
+You can put
+`print("something")`
+ function in your task code to indicate it's execution. Task will be marked as
+ `success`
+ if it's execution ended without unhandled exceptions. So you can use
+ `assert`
+ or
+ `rise Exception`.
+
+
+Task details view
+![Task details](https://image.ibb.co/hY0oCe/Details.png)
+
+
+Create/Edit interface
+![Edit interface](https://image.ibb.co/ncWdCe/Edit.png)
 
 
 ### How to start
@@ -42,3 +63,6 @@ DOCKER_IMAGE_NAME = 'milashensky/measor_tasks_runner'
 * Start:
 `./manage.py runserver`
 * Create first task and enjoy!
+
+The container will continue to execute tasks after the web panel has stopped working, so if you need to stop it run
+`make kill_docker`

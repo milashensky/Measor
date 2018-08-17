@@ -15,7 +15,9 @@
 </div>
 <div class="row w-100">
     <div class="col-6">
-        <h3 class="h2">Log of {{curr_name}}</h3>
+        {% if curr_name %}
+        <h3 class="h2">{{curr_name}} log</h3>
+        {% endif %}
     </div>
     <div class="col-6 text-right">
         <h4>Status: {% if curr_status %}<span class="text-success">Success</span>{% else %}<span class="text-danger">Failed</span>{% endif %}</h4>

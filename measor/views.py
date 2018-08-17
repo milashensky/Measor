@@ -25,10 +25,11 @@ class CreateTaskView(AuthRequered, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = kwargs or {"data": {
+            'code': "from splinter import Browser\n\nwith Browser('chrome') as browser:" +
+            '\n    browser.visit("http://www.google.com")',
             'max_logs_count': app.config['MAX_LOGS_COUNT'],
             'max_log_life': app.config['MAX_LOG_LIFE_DAYS']}
         }
-
         context['title'] = 'Create new task'
         return context
 
@@ -84,6 +85,7 @@ class TaskDetailView(AuthRequered, TaskRequeredMixin, TemplateView):
             logs_names = logs_names[:int(self.task.get('max_logs_count'))]
         log_name = kwargs.get('log_name')
         logs_names.sort(reverse=True)
+        context['curr_status'] = self.task.get('last_status')
         logs = []
         curr_name = ''
         if logs_names:
@@ -95,17 +97,22 @@ class TaskDetailView(AuthRequered, TaskRequeredMixin, TemplateView):
                     if name == log_name:
                         curr_name = name
             if not log_name:
-                curr_name = logs[0].get('name')
+                try:
+                    curr_name = logs[0].get('name')
+                except IndexError:
+                    curr_name = None
             elif not curr_name:
                 abort(404)
-            f = open(os.path.join(logs_path, curr_name + '.txt'), 'r', encoding='utf-8')
-            data = f.readlines()
-            context['curr_log'] = data
-            if len(data) and data[-1].lower() == 'success':
-                context['curr_status'] = True
-            context['curr_name'] = curr_name
-            context['logs_count'] = len(logs_names)
-            f.close()
+            if curr_name:
+                context['curr_status'] = False
+                f = open(os.path.join(logs_path, curr_name + '.txt'), 'r', encoding='utf-8')
+                data = f.readlines()
+                context['curr_log'] = data
+                if len(data) and data[-1].lower() == 'success':
+                    context['curr_status'] = True
+                context['curr_name'] = curr_name
+                context['logs_count'] = len(logs_names)
+                f.close()
         context['logs'] = logs
         return context
 
@@ -128,6 +135,7 @@ class TaskEditView(TaskRequeredMixin, CreateTaskView):
         context.update(super().get_context_data(*args, **kwargs))
         f.close()
         context['title'] = 'Edit %s task' % self.task.get('name', '')
+        context['btntext'] = 'Save'
         return context
 
 

@@ -55,7 +55,7 @@
                         <small class="invalid-feedback">{{ errors.max_log_life }}</small>
                     {% endif %}
                 </div>
-                <button class="btn btn-info" type="submit">Create</button>
+                <button class="btn btn-info" type="submit">{% if btntext %}{{btntext}}{% else %}Create{% endif %}</button>
             </form>
         </div>
     </div>
