@@ -41,7 +41,7 @@ You can put
  if it's execution ended without unhandled exceptions. So you can use
  `assert`
  or
- `rise Exception`.
+ `raise`.
 
 
 Task details view
