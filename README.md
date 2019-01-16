@@ -66,3 +66,16 @@ Create/Edit interface
 
 The container will continue to execute tasks after the web panel has stopped working, so if you need to stop it run
 `make kill_docker`
+
+
+### API
+
+You can get tasks info JSON from Measor to your application using uri:
+```
+/api/stats/
+```
+timestamp (to make sure everything works) and summary info about all tasks.
+```
+/api/task/?last_statuses=n
+```
+detailed tasks info and `n` of last statuses in format `{timestamp: status}`

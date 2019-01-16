@@ -7,10 +7,11 @@ import hashlib
 import binascii
 
 from flask import Flask, send_from_directory
+from flask_mail import Mail
 
 from measor.views import (
     IndexView, LogoutView, CreateTaskView, TaskDetailView, TaskEditView,
-    TaskDeleteView, ApiTask, ApiTasks, PauseTaskView, ApiTaskLogStatus
+    TaskDeleteView, ApiTask, ApiTasks, PauseTaskView, ApiTaskLogStatus, ApiStats
 )
 from measor.filters import format_datetime, timestamp2date, decodeUnicode
 from measor.docker import init_docker
@@ -39,9 +40,11 @@ def create_app():
     app.add_url_rule('/task/<slug>/delete', view_func=TaskDeleteView.as_view('delete_task'))
     app.add_url_rule('/task/<slug>/<log_name>', view_func=TaskDetailView.as_view('log_detail'))
 
+    app.add_url_rule('/api/stats/', view_func=ApiStats.as_view('stats'))
     app.add_url_rule('/api/task/<slug>', view_func=ApiTask.as_view('task_api'))
     app.add_url_rule('/api/task/', view_func=ApiTasks.as_view('tasks_api'))
     app.add_url_rule('/api/<slug>/log/<log_name>/status', view_func=ApiTaskLogStatus.as_view('log_status_api'))
+
     app.jinja_env.filters['decodeUnicode'] = decodeUnicode
     app.jinja_env.filters['datetime'] = format_datetime
     app.jinja_env.filters['timestamp2date'] = timestamp2date

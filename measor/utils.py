@@ -24,7 +24,7 @@ def build_conf(data):
     return out
 
 
-def get_tasks(with_run_status=False):
+def get_tasks(with_run_status=False, last_logs=4):
     tasks = []
     names = list(os.walk(app.config['TASKS_DIR']))[0][1]
     for name in names:
@@ -32,15 +32,41 @@ def get_tasks(with_run_status=False):
             f = open(os.path.join(app.config['TASKS_DIR'], name, 'conf.json'), 'r')
             task = json.loads(f.read())
             if not task.get('wait_for_delete'):
+
                 if with_run_status:
                     try:
                         task['running'] = 'running' in list(os.walk(os.path.join(app.config['TASKS_DIR'], name)))[0][2]
                     except IndexError:
                         task['running'] = False
+
+                if last_logs and int(last_logs) > 0:
+                    file_list = os.listdir(os.path.join(app.config['TASKS_DIR'], name, 'logs'))
+
+                    def get_key(x):
+                        return x.replace('log', '').replace('.txt', '')
+
+                    file_list = sorted(file_list, key=get_key, reverse=True)[:int(last_logs)]
+                    statuses = []
+                    for log in file_list:
+                        statuses.append([get_key(log), get_log_status(name, log)])
+                    task['last_statuses'] = statuses
                 tasks.append(task)
         except FileNotFoundError:
             pass
     return tasks
+
+
+def get_log_status(task, log):
+    status = False
+    try:
+        f = open(os.path.join(app.config['TASKS_DIR'], task, 'logs', log), 'r')
+        data = f.readlines()
+        if len(data) and data[-1].lower() == 'success':
+            status = True
+        f.close()
+    except OSError:
+        pass
+    return status
 
 
 def check_auth(username, password):

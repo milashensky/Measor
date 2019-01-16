@@ -1,12 +1,13 @@
 import os
 import json
+import datetime
 
 from flask import request, Response, abort, redirect, url_for, current_app as app
 from flask.views import View
 from slugify import slugify
 
 from measor.mixins import AuthRequered, TemplateView, TaskRequeredMixin, ApiMixin
-from measor.utils import build_conf, get_tasks
+from measor.utils import build_conf, get_tasks, get_log_status
 
 
 class IndexView(AuthRequered, TemplateView):
@@ -185,20 +186,40 @@ class ApiTasks(AuthRequered, ApiMixin):
     methods = ['GET']
 
     def get(self, *args, **kwargs):
-        return json.dumps(get_tasks(with_run_status=True)), 200, {'ContentType': 'application/json'}
+        return json.dumps(get_tasks(with_run_status=True, last_logs=request.args.get('last_statuses'))), 200, {'ContentType': 'application/json'}
+
+
+class ApiStats(AuthRequered, ApiMixin):
+    methods = ['GET']
+
+    def get(self, *args, **kwargs):
+        tasks = get_tasks(with_run_status=True)
+        running = 0
+        paused = 0
+        success = 0
+        fail = 0
+        for task in tasks:
+            if task.get('last_status'):
+                success += 1
+            else:
+                fail += 1
+            if task.get('pause'):
+                paused += 1
+            if task['running']:
+                running += 1
+        data = {
+            'now': datetime.datetime.now().timestamp(),
+            'tasks_total': len(tasks),
+            'failed': fail,
+            'succeeded': success,
+            'running': running,
+            'paused': paused
+        }
+        return json.dumps(data), 200, {'ContentType': 'application/json'}
 
 
 class ApiTaskLogStatus(AuthRequered, TaskRequeredMixin, ApiMixin):
     methods = ['GET']
 
     def get(self, *args, **kwargs):
-        status = False
-        try:
-            f = open(os.path.join(app.config['TASKS_DIR'], self.task.get('slug', ''), 'logs', kwargs.get('log_name', '') + '.txt'), 'r')
-            data = f.readlines()
-            if len(data) and data[-1].lower() == 'success':
-                status = True
-            f.close()
-        except OSError:
-            pass
-        return json.dumps({'status': status}), 200, {'ContentType': 'application/json'}
+        return json.dumps({'status': get_log_status(self.task.get('slug', ''), kwargs.get('log_name', '') + '.txt')}), 200, {'ContentType': 'application/json'}
