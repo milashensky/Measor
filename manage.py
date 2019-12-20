@@ -7,11 +7,11 @@ import hashlib
 import binascii
 
 from flask import Flask, send_from_directory
-from flask_mail import Mail
 
-from measor.views import (
-    IndexView, LogoutView, CreateTaskView, TaskDetailView, TaskEditView,
-    TaskDeleteView, ApiTask, ApiTasks, PauseTaskView, ApiTaskLogStatus, ApiStats
+from measor.views import IndexView
+from measor.api import (
+    ApiContext, ApiTask, ApiTasks, ApiStats, LoginApi, LogoutApi,
+    ApiTaskLogs
 )
 from measor.filters import format_datetime, timestamp2date, decodeUnicode
 from measor.docker import init_docker
@@ -31,19 +31,20 @@ def create_app():
         container = init_docker(app.config)
         app.config['CONTAINER_ID'] = container.id
 
-    app.add_url_rule('/', view_func=IndexView.as_view('index'))
-    app.add_url_rule('/new_task', view_func=CreateTaskView.as_view('create_task'))
-    app.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
-    app.add_url_rule('/task/<slug>', view_func=TaskDetailView.as_view('task_detail'))
-    app.add_url_rule('/task/<slug>/edit', view_func=TaskEditView.as_view('edit_task'))
-    app.add_url_rule('/task/<slug>/pause', view_func=PauseTaskView.as_view('pause_task'))
-    app.add_url_rule('/task/<slug>/delete', view_func=TaskDeleteView.as_view('delete_task'))
-    app.add_url_rule('/task/<slug>/<log_name>', view_func=TaskDetailView.as_view('log_detail'))
+    app.add_url_rule('/', view_func=IndexView.as_view('bare'))
+    app.add_url_rule('/<path:path>', view_func=IndexView.as_view('index'))
 
+    app.add_url_rule('/api/login/', view_func=LoginApi.as_view('login'))
+    app.add_url_rule('/api/logout/', view_func=LogoutApi.as_view('logout'))
+    app.add_url_rule('/api/context/', view_func=ApiContext.as_view('context'))
     app.add_url_rule('/api/stats/', view_func=ApiStats.as_view('stats'))
-    app.add_url_rule('/api/task/<slug>', view_func=ApiTask.as_view('task_api'))
+    app.add_url_rule('/api/task/<slug>/',
+                     view_func=ApiTask.as_view('task_api'))
     app.add_url_rule('/api/task/', view_func=ApiTasks.as_view('tasks_api'))
-    app.add_url_rule('/api/<slug>/log/<log_name>/status', view_func=ApiTaskLogStatus.as_view('log_status_api'))
+    app.add_url_rule('/api/task/<slug>/log/',
+                     view_func=ApiTaskLogs.as_view('task_logs_api'))
+    app.add_url_rule('/api/task/<slug>/log/<log_name>/',
+                     view_func=ApiTaskLogs.as_view('task_log_api'))
 
     app.jinja_env.filters['decodeUnicode'] = decodeUnicode
     app.jinja_env.filters['datetime'] = format_datetime
@@ -62,7 +63,8 @@ def create_user(settings):
     if password == passw2:
         path = settings.get('AUTH_FILE_PATH')
         pass_str = 'username=%s; password=%s' % (name, password)
-        dk = hashlib.pbkdf2_hmac('sha256', pass_str.encode(), settings.get('AUTH_SALT'), 100000)
+        dk = hashlib.pbkdf2_hmac(
+            'sha256', pass_str.encode(), settings.get('AUTH_SALT'), 100000)
         token = binascii.hexlify(dk).decode()
         f = open(path, 'a')
         f.write(token + '\n')

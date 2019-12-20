@@ -1,7 +1,11 @@
-all: install pull_docker
+all: install build_static pull_docker
 
 install:
 	@pip install -Ur requirements/base.txt
+	@cd static && yarn install && cd -
+
+build_static:
+	@cd static && yarn build-prod && cd -
 
 pull_docker:
 	@docker pull milashensky/measor_tasks_runner

@@ -1,0 +1,35 @@
+{
+    "name": "Measor",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "react": "^16.11.0",
+        "react-dom": "^16.11.0",
+        "react-redux": "^7.1.3",
+        "react-router-dom": "^5.1.2",
+        "react-scripts": "3.2.0",
+        "redux": "^4.0.4",
+        "redux-thunk": "^2.3.0"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "./node_modules/.bin/webpack",
+        "build-prod": "./node_modules/.bin/webpack --config webpack.prod.js",
+        "webpack": "./node_modules/.bin/webpack --display-error-details --watch"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.7.2",
+        "@babel/preset-env": "^7.7.1",
+        "@babel/preset-react": "^7.7.0",
+        "@fortawesome/fontawesome-free": "^5.12.0",
+        "babel-loader": "^8.0.6",
+        "css-loader": "^3.2.0",
+        "file-loader": "^4.2.0",
+        "react-svg-loader": "^3.0.3",
+        "style-loader": "^1.0.0",
+        "terser-webpack-plugin": "^2.3.1",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10",
+        "webpack-merge": "^4.2.2"
+    }
+}

@@ -4,32 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="/static/plugins/bootstrap/css/bootstrap.css" type="text/css" rel="stylesheet" />
-    <link href="/static/css/styles.css" type="text/css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.min.css" type="text/css" />
-    {% block css %}{% endblock %}
     <title>Measor - Functional monitoring system</title>
-
 </head>
 
 <body>
-
-    {% include 'blocks/navigation.html' %}
-    <div class="container-fluid">
-        <div class="row">
-            {% include 'blocks/sidebar.html' %}
-            <main  class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-                {% block content %}
-                {% endblock %}
-            </main>
-        </div>
-    </div>
-<script type="text/javascript" src="/static/plugins/js/jquery.min.js"></script>
-<script type="text/javascript" src="/static/plugins/js/popper.min.js"></script>
-<script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.js"></script>
-<script type="text/javascript" src="/static/js/navigation.js"></script>
-{% block js %}{% endblock %}
+    <div id="app"></div>
+    <script type="text/javascript" src="/static/assets/app.js"></script>
 </body>
 
 </html>
